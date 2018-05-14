@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<Tab xmlns="http://javafx.com/javafx"
+     xmlns:fx="http://javafx.com/fxml"
+     fx:controller="yousync.ui.LocalTabController"
+     fx:id="localTab" text="Local">
+    <ScrollPane fx:id="scrollPane" fitToWidth="true" fitToHeight="true">
+        <TableView fx:id="tableView">
+            <columns>
+                <TableColumn fx:id="image" text="Cover">
+                    <cellValueFactory>
+                        <PropertyValueFactory property="imageView"/>
+                    </cellValueFactory>
+                </TableColumn>
+                <TableColumn fx:id="artist" text="Artist">
+                    <cellValueFactory>
+                        <PropertyValueFactory property="artist"/>
+                    </cellValueFactory>
+                </TableColumn>
+                <TableColumn fx:id="title" text="Title">
+                    <cellValueFactory>
+                        <PropertyValueFactory property="title"/>
+                    </cellValueFactory>
+                </TableColumn>
+                <TableColumn fx:id="selected">
+                    <cellValueFactory>
+                        <PropertyValueFactory property="checkBox"/>
+                    </cellValueFactory>
+                </TableColumn>
+            </columns>
+        </TableView>
+    </ScrollPane>
+</Tab>

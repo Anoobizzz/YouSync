@@ -15,6 +15,7 @@ public class CommonConfiguration {
         return ClientBuilder.newClient();
     }
 
+    //Circular complexity fix...
     @Bean
     public ViewResolver viewResolver(){
         InternalResourceViewResolver resolver = new InternalResourceViewResolver();

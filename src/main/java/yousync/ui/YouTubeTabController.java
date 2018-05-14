@@ -4,15 +4,14 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import yousync.domain.Song;
 import yousync.services.CoreService;
@@ -25,6 +24,11 @@ import static javafx.collections.FXCollections.observableArrayList;
 public class YouTubeTabController extends AbstractUIController {
     private static Stage authStage;
     private static ObservableList<Song> items = observableArrayList();
+
+    @Value("${settings.youtube.id:#{null}}")
+    private String clientId;
+    @Value("${settings.youtube.secret:#{null}}")
+    private String clientSecret;
 
     @Autowired
     private CoreService coreService;
@@ -52,6 +56,12 @@ public class YouTubeTabController extends AbstractUIController {
     void initialize() {
         leftPane.maxWidthProperty().bind(splitPane.widthProperty().multiply(0.22));
         initializeEventHandlers();
+        if (clientId != null) {
+            clientIdBox.setText(clientId);
+        }
+        if (clientSecret != null) {
+            clientSecretBox.setText(clientSecret);
+        }
     }
 
     private void initializeEventHandlers() {

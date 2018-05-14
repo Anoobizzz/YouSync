@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<TableView xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           prefHeight="400.0" prefWidth="600.0"
+           fx:id="tableView" fx:controller="yousync.ui.TableViewController">
+    <columnResizePolicy>
+        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+    </columnResizePolicy>
+    <columns>
+        <TableColumn fx:id="image" text="Cover">
+            <cellValueFactory>
+                <PropertyValueFactory property="imageView"/>
+            </cellValueFactory>
+        </TableColumn>
+        <TableColumn fx:id="artist" text="Artist">
+            <cellValueFactory>
+                <PropertyValueFactory property="artist"/>
+            </cellValueFactory>
+        </TableColumn>
+        <TableColumn fx:id="title" text="Title">
+            <cellValueFactory>
+                <PropertyValueFactory property="title"/>
+            </cellValueFactory>
+        </TableColumn>
+        <TableColumn fx:id="selected">
+            <graphic>
+                <CheckBox fx:id="selectAll"/>
+            </graphic>
+            <cellValueFactory>
+                <PropertyValueFactory property="checkBox"/>
+            </cellValueFactory>
+        </TableColumn>
+    </columns>
+</TableView>

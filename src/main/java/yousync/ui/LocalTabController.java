@@ -24,7 +24,7 @@ import static yousync.services.CoreService.DEFAULT_DEST;
 
 @Component(value = "localTab")
 public class LocalTabController {
-    private static ObservableList<Song> items = observableArrayList();
+    private static ObservableList<Song> songs = observableArrayList();
 
     @Value("${settings.music.directory:#{null}}")
     private String musicDirectoryDest;
@@ -37,8 +37,7 @@ public class LocalTabController {
     @FXML
     private ScrollPane scrollPane;
     @FXML
-    public TableView tableView;
-
+    private TableView tableView;
 
     @FXML
     void initialize() {
@@ -75,11 +74,11 @@ public class LocalTabController {
         loadNewContent(songs);
     }
 
-    private void storeContent(ObservableList<Song> items) {
-        LocalTabController.items.addAll(items);
+    private void storeContent(ObservableList<Song> songs) {
+        LocalTabController.songs.addAll(songs);
     }
 
-    private void loadNewContent(ObservableList<Song> gridPanes) {
-        runLater(() -> tableView.setItems(observableArrayList(gridPanes)));
+    private void loadNewContent(ObservableList<Song> songs) {
+        runLater(() -> tableView.setItems(observableArrayList(songs)));
     }
 }

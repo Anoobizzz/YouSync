@@ -36,7 +36,7 @@ public class YouTubeSource implements MusicSource {
     private static final String GOOGLE_TOKEN_REQUEST_URL = "https://www.googleapis.com/oauth2/v4/token";
     private static final String GOOGLE_LOOPBACK_OAUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
     private static final String YOUTUBE_BASE_URI = "https://www.youtube.com/watch?v=";
-    private static final String YOTUBE_BASE_API_URI = "https://www.googleapis.com/youtube/v3";
+    private static final String YOUTUBE_BASE_API_URI = "https://www.googleapis.com/youtube/v3";
 
     private static Token token = new Token();
 
@@ -107,12 +107,12 @@ public class YouTubeSource implements MusicSource {
     }
 
     @Override
-    public PlaylistResponse getPlaylist(PlaylistRequest request) throws MalformedURLException {
+    public PlaylistResponse getPlaylist(PlaylistRequest request) {
         if (isNotEmpty(request.getAuthorizationCode())) {
             getToken(request.getAuthorizationCode());
         }
 
-        WebTarget webTarget = client.target(YOTUBE_BASE_API_URI + "/playlistItems")
+        WebTarget webTarget = client.target(YOUTUBE_BASE_API_URI + "/playlistItems")
                 .queryParam("access_token", token.getAccessToken())
                 .queryParam("playlistId", request.getId())
                 .queryParam("part", "id,snippet")
@@ -130,10 +130,25 @@ public class YouTubeSource implements MusicSource {
             List<Song> songs = new ArrayList<>(items.size());
             for (PlaylistItem playlistItem : items) {
                 PlaylistItem.Snippet snippet = playlistItem.getSnippet();
-                songs.add(new Song(snippet.getTitle(), snippet.getThumbnailUrl(), YOUTUBE_BASE_URI + snippet.getVideoId()));
+                try {
+                    songs.add(new Song(snippet.getTitle(), snippet.getThumbnailUrl(), new URL(YOUTUBE_BASE_URI + snippet.getVideoId())));
+                } catch (MalformedURLException e) {
+                    LOG.warn("Malformed URL encountered during page processing, skipping.");
+                }
             }
             return new PlaylistResponse(songs, playlistItemsResponse.getNextPageToken());
         }
-        throw new BadRequestException("Request response status was not 200 OK");
+        throw new BadRequestException("Request response status was not 200");
+    }
+
+    //TODO: Implementation of authorization need check, potentially impractical due to need of auth to make auth check :D
+    @Override
+    public boolean requiresAuthorization(String playlist) {
+        WebTarget webTarget = client.target(YOUTUBE_BASE_API_URI + "/playlists")
+                .queryParam("access_token", token.getAccessToken())
+                .queryParam("playlistId", playlist)
+                .queryParam("part", "status")
+                .queryParam("maxResults", 1);
+        return true;
     }
 }

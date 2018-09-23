@@ -14,7 +14,6 @@ public class PlaylistItemsResponse {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class PlaylistItem {
-
         private Snippet snippet;
 
         @JsonIgnoreProperties(ignoreUnknown = true)

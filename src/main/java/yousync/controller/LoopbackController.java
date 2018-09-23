@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import yousync.domain.PlaylistRequest;
-import yousync.services.CoreService;
+import yousync.service.CoreService;
 import yousync.sources.YouTubeSource;
 import yousync.ui.YouTubeTabController;
 

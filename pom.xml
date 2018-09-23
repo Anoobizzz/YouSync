@@ -5,7 +5,7 @@
 
     <groupId>yousync</groupId>
     <artifactId>yousync</artifactId>
-    <version>0.0.1</version>
+    <version>0.1</version>
     <packaging>jar</packaging>
 
     <name>yousync</name>
@@ -14,7 +14,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.0.1.RELEASE</version>
+        <version>2.0.5.RELEASE</version>
         <relativePath/>
     </parent>
     <properties>
@@ -24,7 +24,15 @@
         <jackson.version>2.9.5</jackson.version>
         <commons.version>3.7</commons.version>
         <mp3.version>0.9.1</mp3.version>
+        <youGet.version>0.2</youGet.version>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <!--Spring-->
@@ -35,10 +43,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-context-support</artifactId>
         </dependency>
 
         <!--Jersey-->
@@ -71,7 +75,6 @@
         </dependency>
 
         <!--Other-->
-
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
@@ -81,6 +84,11 @@
             <groupId>com.mpatric</groupId>
             <artifactId>mp3agic</artifactId>
             <version>${mp3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Anoobizzz</groupId>
+            <artifactId>YouGet</artifactId>
+            <version>${youGet.version}</version>
         </dependency>
     </dependencies>
 

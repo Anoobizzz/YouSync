@@ -6,6 +6,7 @@ import javafx.scene.image.ImageView;
 import yousync.ui.AbstractUIController;
 
 import java.io.ByteArrayInputStream;
+import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,15 +22,15 @@ public class Song {
     private String title;
     private ImageView imageView;
     private CheckBox checkBox = new CheckBox();
-    private String url;
+    private URL url;
 
-    public Song(String rawTitle, String cover, String url) {
+    public Song(String rawTitle, String cover, URL url) {
         parseArtistAndTitle(rawTitle);
         this.url = url;
         this.imageView = new ImageView(resolveImage(cover));
     }
 
-    public Song(String artist, String title, byte[] cover){
+    public Song(String artist, String title, byte[] cover) {
         this.artist = artist;
         this.title = title;
         this.imageView = new ImageView(resolveImage(cover));
@@ -46,7 +47,7 @@ public class Song {
         }
     }
 
-    static Image resolveImage(String url) {
+    private static Image resolveImage(String url) {
         Image image;
         if (isEmpty(url)) {
             return UNAVAILABLE_IMAGE;
@@ -55,7 +56,7 @@ public class Song {
         return image.isError() ? UNAVAILABLE_IMAGE : image;
     }
 
-    static Image resolveImage(byte[] bytes) {
+    private static Image resolveImage(byte[] bytes) {
         Image image;
         if (bytes == null) {
             return UNAVAILABLE_IMAGE;
@@ -96,11 +97,15 @@ public class Song {
         this.checkBox = checkBox;
     }
 
-    public String getUrl() {
+    public boolean isSelected() {
+        return checkBox.isSelected();
+    }
+
+    public URL getUrl() {
         return url;
     }
 
-    public void setUrl(String url) {
+    public void setUrl(URL url) {
         this.url = url;
     }
 }

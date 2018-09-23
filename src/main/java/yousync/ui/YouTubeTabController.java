@@ -14,16 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import yousync.domain.Song;
-import yousync.services.CoreService;
+import yousync.service.CoreService;
 import yousync.sources.YouTubeSource;
 
 import static javafx.application.Platform.runLater;
-import static javafx.collections.FXCollections.observableArrayList;
 
 @Component(value = "youTubeTab")
 public class YouTubeTabController extends AbstractUIController {
     private static Stage authStage;
-    private static ObservableList<Song> items = observableArrayList();
 
     @Value("${settings.youtube.id:#{null}}")
     private String clientId;
@@ -40,7 +38,7 @@ public class YouTubeTabController extends AbstractUIController {
     @FXML
     private AnchorPane leftPane;
     @FXML
-    private TableView tableView;
+    private TableView<Song> tableView;
     @FXML
     private Button downloadButton;
     @FXML
@@ -66,7 +64,7 @@ public class YouTubeTabController extends AbstractUIController {
 
     private void initializeEventHandlers() {
         loadButton.setOnAction(event -> coreService.checkAuthorization(youTubeSource, playlistIdBox.getText()));
-        downloadButton.setOnAction(event -> coreService.downloadSongs(youTubeSource, items));
+        downloadButton.setOnAction(event -> coreService.downloadSongs(getSelectedSongs()));
     }
 
     public void displayWebAuthenticationWindow(String page) {
@@ -96,12 +94,7 @@ public class YouTubeTabController extends AbstractUIController {
     }
 
     @Override
-    void storeContent(ObservableList<Song> items) {
-        YouTubeTabController.items.addAll(items);
-    }
-
-    @Override
     void loadNewContent(ObservableList<Song> nodes) {
-        runLater(() -> tableView.setItems(items));
+        runLater(() -> tableView.setItems(songs));
     }
 }

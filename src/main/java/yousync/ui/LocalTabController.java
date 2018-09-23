@@ -10,7 +10,6 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableView;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import yousync.domain.Song;
 
@@ -19,16 +18,9 @@ import java.io.IOException;
 
 import static javafx.application.Platform.runLater;
 import static javafx.collections.FXCollections.observableArrayList;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static yousync.services.CoreService.DEFAULT_DEST;
 
 @Component(value = "localTab")
-public class LocalTabController {
-    private static ObservableList<Song> songs = observableArrayList();
-
-    @Value("${settings.music.directory:#{null}}")
-    private String musicDirectoryDest;
-
+public class LocalTabController extends AbstractUIController {
     @Autowired
     private MainController mainController;
 
@@ -37,48 +29,34 @@ public class LocalTabController {
     @FXML
     private ScrollPane scrollPane;
     @FXML
-    private TableView tableView;
+    private TableView<Song> tableView;
 
     @FXML
     void initialize() {
-        if (isEmpty(musicDirectoryDest)) {
-            musicDirectoryDest = DEFAULT_DEST;
-        }
         loadSongs();
     }
 
     private void loadSongs() {
-        File musicDirectory = new File(musicDirectoryDest);
-        if (!musicDirectory.exists()) {
-            if (musicDirectory.mkdir()) {
-                runLater(() -> mainController.showErrorWindow("Failed to create directory for music"));
+        File[] localFiles = directoryResolver.getDownloadDirectory()
+                .listFiles((dir, name) -> name.matches("^.*\\.mp3+$"));
+        if (localFiles != null) {
+            ObservableList<Song> songs = observableArrayList();
+            try {
+                for (File file : localFiles) {
+                    Mp3File mp3File = new Mp3File(file);
+                    ID3Wrapper wrapper = new ID3Wrapper(mp3File.getId3v1Tag(), mp3File.getId3v2Tag());
+                    songs.add(new Song(wrapper.getArtist(), wrapper.getTitle(), wrapper.getAlbumImage()));
+                }
+            } catch (IOException | UnsupportedTagException | InvalidDataException e) {
+                //TODO: Error handling
+                e.printStackTrace();
             }
+            storeContent(songs);
+            loadNewContent(songs);
         }
-        File[] localFiles = musicDirectory.listFiles((dir, name) -> name.matches("^.*\\.mp3+$"));
-        ObservableList<Song> songs = observableArrayList();
-        try {
-            for (File file : localFiles) {
-                Mp3File mp3File = new Mp3File(file);
-                ID3Wrapper wrapper = new ID3Wrapper(mp3File.getId3v1Tag(), mp3File.getId3v2Tag());
-                songs.add(new Song(wrapper.getArtist(), wrapper.getTitle(), wrapper.getAlbumImage()));
-            }
-        } catch (IOException e) {
-            //TODO: Error handling
-            e.printStackTrace();
-        } catch (UnsupportedTagException e) {
-            e.printStackTrace();
-        } catch (InvalidDataException e) {
-            e.printStackTrace();
-        }
-        storeContent(songs);
-        loadNewContent(songs);
     }
 
-    private void storeContent(ObservableList<Song> songs) {
-        LocalTabController.songs.addAll(songs);
-    }
-
-    private void loadNewContent(ObservableList<Song> songs) {
+    protected void loadNewContent(ObservableList<Song> songs) {
         runLater(() -> tableView.setItems(observableArrayList(songs)));
     }
 }

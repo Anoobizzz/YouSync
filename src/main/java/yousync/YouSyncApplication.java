@@ -5,9 +5,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.springframework.boot.SpringApplication;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import java.io.IOException;
@@ -21,7 +22,8 @@ public class YouSyncApplication extends Application {
 
     @Override
     public void init() throws IOException {
-        context = SpringApplication.run(YouSyncApplication.class);
+        context = new SpringApplicationBuilder(YouSyncApplication.class)
+                .web(WebApplicationType.NONE).build().run();
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Main.fxml"));
         loader.setControllerFactory(context::getBean);
         root = loader.load();

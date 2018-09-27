@@ -30,8 +30,9 @@ public class CoreService {
     public void checkAuthorization(MusicSource musicSource, String playlist) {
         if (!musicSource.requiresAuthorization(playlist) || musicSource.isAuthorized()) {
             loadSongs(musicSource, new PlaylistRequest(playlist));
+        } else {
+            musicSource.authorize().thenRun(() -> loadSongs(musicSource, new PlaylistRequest(playlist)));
         }
-        musicSource.authorize();
     }
 
     public void loadSongs(MusicSource musicSource, PlaylistRequest request) {

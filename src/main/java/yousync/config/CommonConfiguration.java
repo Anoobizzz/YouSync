@@ -5,8 +5,6 @@ import io.github.anoobizzz.youget.exception.InitializationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.ViewResolver;
-import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import yousync.service.DirectoryResolverService;
 
 import javax.ws.rs.client.Client;
@@ -20,15 +18,6 @@ public class CommonConfiguration {
     @Bean
     Client client() {
         return ClientBuilder.newClient();
-    }
-
-    //Circular complexity fix...
-    @Bean
-    ViewResolver viewResolver() {
-        InternalResourceViewResolver resolver = new InternalResourceViewResolver();
-        resolver.setPrefix("/WEB-INF/");
-        resolver.setSuffix(".html");
-        return resolver;
     }
 
     @Bean

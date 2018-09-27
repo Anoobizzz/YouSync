@@ -60,6 +60,7 @@ public class YouTubeTabController extends AbstractUIController {
         if (clientSecret != null) {
             clientSecretBox.setText(clientSecret);
         }
+        runLater(() -> authStage = new Stage());
     }
 
     private void initializeEventHandlers() {
@@ -68,13 +69,11 @@ public class YouTubeTabController extends AbstractUIController {
     }
 
     public void displayWebAuthenticationWindow(String page) {
-        Stage authStage = new Stage();
         WebView webView = new WebView();
         webView.getEngine().loadContent(page);
         Scene scene = new Scene(webView);
         authStage.setScene(scene);
         authStage.show();
-        YouTubeTabController.authStage = authStage;
     }
 
     public void closeWebAuthenticationWindow() {

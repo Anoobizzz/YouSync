@@ -3,13 +3,13 @@ package yousync.ui;
 import javafx.collections.ObservableList;
 import org.springframework.beans.factory.annotation.Autowired;
 import yousync.domain.Song;
-import yousync.service.DirectoryResolverService;
+import yousync.service.ConfigurationService;
 
 import static javafx.collections.FXCollections.observableArrayList;
 
 public abstract class AbstractUIController {
     @Autowired
-    protected DirectoryResolverService directoryResolver;
+    protected ConfigurationService directoryResolver;
 
     protected ObservableList<Song> songs = observableArrayList();
 

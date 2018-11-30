@@ -10,7 +10,7 @@ import yousync.domain.Song;
 import yousync.domain.youtube.PlaylistItemsResponse;
 import yousync.domain.youtube.PlaylistItemsResponse.PlaylistItem;
 import yousync.domain.youtube.Token;
-import yousync.ui.YouTubeTabController;
+import yousync.ui.MainController;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.client.Client;
@@ -53,7 +53,7 @@ public class YouTubeSource implements MusicSource {
     @Autowired
     private Client client;
     @Autowired
-    private YouTubeTabController controller;
+    private MainController controller;
 
     public CompletableFuture<Void> authorize() {
         String page = client.target(GOOGLE_LOOPBACK_OAUTH_URL)

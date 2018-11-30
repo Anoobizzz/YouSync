@@ -5,15 +5,15 @@ import io.github.anoobizzz.youget.exception.InitializationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import yousync.service.DirectoryResolverService;
+import yousync.service.ConfigurationService;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 
 @Configuration
 public class CommonConfiguration {
-    @Value("${settings.music.directory:#{null}}")
-    private String musicDirectory;
+//    @Value("${settings.music.directory:#{null}}")
+//    private String musicDirectory;
 
     @Bean
     Client client() {
@@ -21,8 +21,8 @@ public class CommonConfiguration {
     }
 
     @Bean
-    DirectoryResolverService directoryResolverService() {
-        return new DirectoryResolverService(musicDirectory);
+    ConfigurationService directoryResolverService() {
+        return new ConfigurationService();
     }
 
     @Bean

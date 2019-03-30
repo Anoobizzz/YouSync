@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SplitPane?>
+<SplitPane fx:id="outerSplitPane" maxHeight="-Infinity" maxWidth="-Infinity"
+           minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" prefHeight="400.0" prefWidth="600.0"
+           stylesheets="@../css/Main.css" xmlns="http://javafx.com/javafx/8.0.172-ea"
+           xmlns:fx="http://javafx.com/fxml/1" fx:controller="yousync.ui.MainController">
+    <SplitPane fx:id="innerSplitPane" prefHeight="315.0" prefWidth="600.0">
+        <fx:include fx:id="menuPane" source="Menu.fxml"/>
+        <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="200.0" prefWidth="200.0">
+            <fx:include fx:id="tableView" source="TableView.fxml"/>
+        </ScrollPane>
+    </SplitPane>
+    <fx:include fx:id="playerPane" source="Player.fxml"/>
+</SplitPane>

@@ -10,6 +10,7 @@ import yousync.domain.Song;
 import yousync.domain.youtube.PlaylistItemsResponse;
 import yousync.domain.youtube.PlaylistItemsResponse.PlaylistItem;
 import yousync.domain.youtube.Token;
+import yousync.ui.AlertController;
 import yousync.ui.MainController;
 
 import javax.ws.rs.BadRequestException;
@@ -22,10 +23,8 @@ import javax.ws.rs.core.Response;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +35,6 @@ import static java.util.concurrent.CompletableFuture.runAsync;
 import static javafx.application.Platform.runLater;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Component
@@ -47,40 +45,21 @@ public class YouTubeSource implements MusicSource {
     private static final String GOOGLE_LOOPBACK_OAUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
     private static final String YOUTUBE_BASE_URI = "https://www.youtube.com/watch?v=";
     private static final String YOUTUBE_BASE_API_URI = "https://www.googleapis.com/youtube/v3";
-    private static String authorizationCode = null;
-    private static Token token = new Token();
 
+    @Autowired
+    private MainController mainController;
     @Autowired
     private Client client;
-    @Autowired
-    private MainController controller;
 
-    public CompletableFuture<Void> authorize() {
-        String page = client.target(GOOGLE_LOOPBACK_OAUTH_URL)
-                .queryParam("client_id", controller.getClientIdBoxText())
-                .queryParam("redirect_uri", "http://127.0.0.1:8080/loopback")
-                .queryParam("response_type", "code")
-                .queryParam("scope", "https://www.googleapis.com/auth/youtube.force-ssl")
-                .request().get().readEntity(String.class);
-        runLater(() -> controller.displayWebAuthenticationWindow(page));
-        return runAsync(() -> {
-            try (ServerSocket loopbackSocket = new ServerSocket()) {
-                loopbackSocket.bind(new InetSocketAddress("localhost", 8080));
+    private Token token = new Token();
+    private String authorizationCode = null;
 
-                Socket socket = null;
-                while (socket == null) {
-                    socket = loopbackSocket.accept();
-                }
-
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                authorizationCode = in.lines().filter(s -> s.contains("code=")).findFirst()
-                        .orElseThrow(() -> new BadRequestException("Failed to retrieve authorization code"))
-                        .replaceAll(".*code=([^\\s&]*).*", "$1");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            runLater(() -> controller.closeWebAuthenticationWindow());
-        });
+    //TODO: Implement check for authorization requirement
+    @Override
+    public boolean requiresAuthorization(String playlist) {
+        //Playlist GET https://www.youtube.com/playlist?list=id and look for alerts array
+        //Videos?
+        return true;
     }
 
     @Override
@@ -88,75 +67,92 @@ public class YouTubeSource implements MusicSource {
         return isNotEmpty(authorizationCode);
     }
 
-    private String getToken() {
+    @Override
+    public CompletableFuture<Void> authorize(final String clientId) {
+        final String page = client.target(GOOGLE_LOOPBACK_OAUTH_URL)
+                .queryParam("client_id", clientId)
+                .queryParam("redirect_uri", "http://127.0.0.1:8080/loopback")
+                .queryParam("response_type", "code")
+                .queryParam("scope", "https://www.googleapis.com/auth/youtube.force-ssl")
+                .request().get().readEntity(String.class);
+        runLater(() -> mainController.displayWebAuthenticationWindow(page));
+        return runAsync(() -> {
+            //TODO: Redo the socket response await process
+            try (final ServerSocket loopbackSocket = new ServerSocket(8080)) {
+                final BufferedReader in = new BufferedReader(new InputStreamReader(loopbackSocket.accept().getInputStream()));
+                authorizationCode = in.lines().filter(s -> s.contains("code=")).findFirst()
+                        .orElseThrow(() -> new BadRequestException("Failed to retrieve authorization code"))
+                        .replaceAll(".*code=([^\\s&]*).*", "$1");
+            } catch (IOException e) {
+                final String errorMessage = e.getMessage();
+                LOG.error(errorMessage);
+                AlertController.showErrorWindow(errorMessage);
+            }
+            runLater(() -> mainController.hideWebAuthenticationWindow());
+        });
+    }
+
+    private String getToken(final String clientId, final String clientSecret) {
         if (isNotEmpty(token.getRefreshToken())) {
-            final long tokenExpirationTime = token.getTokenAcquireTime() + token.getExpiresIn() * 1000;
-            if (tokenExpirationTime < currentTimeMillis()) {
-                refreshToken();
+            if (token.getExpirationTimeMillis() < currentTimeMillis()) {
+                refreshAccessToken(clientSecret, clientId);
             }
             return token.getAccessToken();
         }
-
-        if (isEmpty(authorizationCode)) {
-            throw new BadRequestException("Can't get token without authorization code");
-        }
-
-        fetchToken();
+        saveNewAccessToken(clientId, clientSecret);
         return token.getAccessToken();
     }
 
-    private void fetchToken() {
-        Entity<Form> entity = Entity.entity(new Form()
-                .param("client_id", controller.getClientIdBoxText())
-                .param("client_secret", controller.getClientSecretBoxText())
+    private void saveNewAccessToken(final String clientId, final String clientSecret) {
+        fetchAndSaveToken(Entity.entity(new Form()
+                .param("client_id", clientId)
+                .param("client_secret", clientSecret)
                 .param("redirect_uri", "http://127.0.0.1:8080/loopback")
                 .param("grant_type", "authorization_code")
-                .param("code", authorizationCode), MediaType.APPLICATION_FORM_URLENCODED);
-        Response response = client.target(GOOGLE_TOKEN_REQUEST_URL)
-                .request().header(CONTENT_TYPE, APPLICATION_FORM_URLENCODED)
-                .post(entity);
-        if (response.getStatus() != 200) {
-            throw new BadRequestException("Request response status was not 200 OK");
-        }
-        token = response.readEntity(Token.class).setTokenAcquireTime(currentTimeMillis());
+                .param("code", authorizationCode), MediaType.APPLICATION_FORM_URLENCODED));
     }
 
-    private void refreshToken() {
-        Entity<Form> entity = Entity.entity(new Form()
-                .param("client_id", controller.getClientIdBoxText())
-                .param("client_secret", controller.getClientSecretBoxText())
+    private void refreshAccessToken(final String clientSecret, final String clientId) {
+        fetchAndSaveToken(Entity.entity(new Form()
+                .param("client_id", clientId)
+                .param("client_secret", clientSecret)
                 .param("grant_type", "authorization_code")
-                .param("refresh_token", token.getRefreshToken()), MediaType.APPLICATION_FORM_URLENCODED);
-        Response response = client.target(GOOGLE_TOKEN_REQUEST_URL)
+                .param("refresh_token", token.getRefreshToken()), MediaType.APPLICATION_FORM_URLENCODED));
+    }
+
+    private void fetchAndSaveToken(final Entity<Form> entity) {
+        final Response response = client.target(GOOGLE_TOKEN_REQUEST_URL)
                 .request().header(CONTENT_TYPE, APPLICATION_FORM_URLENCODED)
                 .post(entity);
 
-        if (response.getStatus() != 200) {
-            throw new BadRequestException("Request response status was not 200 OK");
+        final int status = response.getStatus();
+        if (status != 200) {
+            throw new BadRequestException("Failed to fetch access token with status: " + status);
         }
         token = response.readEntity(Token.class).setTokenAcquireTime(currentTimeMillis());
     }
 
     @Override
-    public PlaylistResponse getPlaylist(PlaylistRequest request) {
+    public PlaylistResponse getPlaylist(final PlaylistRequest request) {
         WebTarget webTarget = client.target(YOUTUBE_BASE_API_URI + "/playlistItems")
-                .queryParam("access_token", getToken())
+                .queryParam("access_token", getToken(request.getClientId(), request.getClientSecret()))
                 .queryParam("playlistId", request.getId())
                 .queryParam("part", "id,snippet")
                 .queryParam("maxResults", 50);
 
-        String nextPageToken = request.getNextPageToken();
+        final String nextPageToken = request.getNextPageToken();
         if (isNotEmpty(nextPageToken)) {
             webTarget = webTarget.queryParam("pageToken", nextPageToken);
         }
 
-        Response response = webTarget.request().get();
-        if (response.getStatus() == 200) {
+        final Response response = webTarget.request().get();
+        final int status = response.getStatus();
+        if (status == 200) {
             PlaylistItemsResponse playlistItemsResponse = response.readEntity(PlaylistItemsResponse.class);
-            List<PlaylistItem> items = playlistItemsResponse.getItems();
-            List<Song> songs = new ArrayList<>(items.size());
-            for (PlaylistItem playlistItem : items) {
-                PlaylistItem.Snippet snippet = playlistItem.getSnippet();
+            final List<PlaylistItem> items = playlistItemsResponse.getItems();
+            final List<Song> songs = new ArrayList<>(items.size());
+            for (final PlaylistItem playlistItem : items) {
+                final PlaylistItem.Snippet snippet = playlistItem.getSnippet();
                 try {
                     songs.add(new Song(snippet.getTitle(), snippet.getThumbnailUrl(), new URL(YOUTUBE_BASE_URI + snippet.getVideoId())));
                 } catch (MalformedURLException e) {
@@ -166,14 +162,6 @@ public class YouTubeSource implements MusicSource {
             //TODO: Not all pages of playlist consumed, check whats wrong
             return new PlaylistResponse(songs, playlistItemsResponse.getNextPageToken());
         }
-        throw new BadRequestException("Request response status was not 200");
-    }
-
-    //TODO: Implement check for authorization requirement
-    @Override
-    public boolean requiresAuthorization(String playlist) {
-        //Playlist GET https://www.youtube.com/playlist?list=id and look for alerts array
-        //Videos?
-        return true;
+        throw new BadRequestException("Failed to get playlist from YouTube with status: " + status);
     }
 }

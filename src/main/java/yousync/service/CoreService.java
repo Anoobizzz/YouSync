@@ -11,7 +11,7 @@ import yousync.domain.PlaylistRequest;
 import yousync.domain.PlaylistResponse;
 import yousync.domain.Song;
 import yousync.sources.MusicSource;
-import yousync.ui.MainController;
+import yousync.ui.TableViewController;
 
 import javax.ws.rs.ProcessingException;
 import java.util.concurrent.ForkJoinPool;
@@ -22,29 +22,34 @@ public class CoreService {
     private static final ForkJoinPool FORK_JOIN_POOL = new ForkJoinPool(4);
 
     @Autowired
-    private MainController mainController;
-
+    private TableViewController tableView;
     @Autowired
     private YouGet downloadSevice;
+    @Autowired
+    private SourceResolverService sourceResolver;
 
-    public void checkAuthorization(MusicSource musicSource, String playlist) {
-        if (!musicSource.requiresAuthorization(playlist) || musicSource.isAuthorized()) {
-            loadSongs(musicSource, new PlaylistRequest(playlist));
+    public void checkAuthorization(final String playlistId, final String clientId, final String clientSecret) {
+        final MusicSource source = sourceResolver.resolveResource(playlistId);
+        final PlaylistRequest request = new PlaylistRequest(playlistId, clientId, clientSecret);
+        if (!source.requiresAuthorization(playlistId) || source.isAuthorized()) {
+            loadSongs(source, request);
         } else {
-            musicSource.authorize().thenRun(() -> loadSongs(musicSource, new PlaylistRequest(playlist)));
+            source.authorize(clientId).thenRun(() -> loadSongs(source, request));
         }
     }
 
-    public void loadSongs(MusicSource musicSource, PlaylistRequest request) {
+    private void loadSongs(final MusicSource musicSource, final PlaylistRequest request) {
         try {
-            PlaylistResponse response = musicSource.getPlaylist(request);
-            do {
-                ObservableList<Song> songs = response.getCurrentSongs();
-                FORK_JOIN_POOL.execute(() -> mainController.loadContent(songs));
-                response = musicSource.getPlaylist(new PlaylistRequest(request.getId(), response.getNextPageToken()));
-            } while (response.hasNext());
+            loadSongs(musicSource, request, musicSource.getPlaylist(request));
         } catch (ProcessingException | IllegalStateException e) {
             LOG.error("An exception occurred during response entity processing: {}", e.getMessage());
+        }
+    }
+
+    private void loadSongs(final MusicSource musicSource, final PlaylistRequest request, final PlaylistResponse response) {
+        FORK_JOIN_POOL.execute(() -> tableView.loadContent(response.getCurrentSongs()));
+        if (response.hasNext()) {
+            loadSongs(musicSource, request, musicSource.getPlaylist(request.setNextPageToken(response.getNextPageToken())));
         }
     }
 

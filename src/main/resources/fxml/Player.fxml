@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane fx:id="playerPane" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="407.0" stylesheets="@../css/Player.css" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="yousync.ui.PlayerController">
+    <children>
+        <Button fx:id="previous" onMouseClicked="#onPreviousMouseClicked" text="Previous" AnchorPane.bottomAnchor="45.0" AnchorPane.leftAnchor="25.0" />
+        <Button fx:id="next" onMouseClicked="#onNextMouseClicked" text="Next" AnchorPane.bottomAnchor="45.0" AnchorPane.rightAnchor="25.0" />
+        <Button fx:id="playPause" onMouseClicked="#onPlayPauseMouseClicked" contentDisplay="CENTER" layoutX="167.0" layoutY="25.0" text="Play/Pause" textAlignment="CENTER" AnchorPane.bottomAnchor="45.0" AnchorPane.leftAnchor="165.0" AnchorPane.rightAnchor="165.0" />
+        <Label fx:id="currentTime" text="Current time" AnchorPane.bottomAnchor="25.0" AnchorPane.leftAnchor="5.0" />
+        <Label fx:id="elapsedRemainingTime" text="Elapsed/Remaining" AnchorPane.bottomAnchor="25.0" AnchorPane.rightAnchor="5.0" />
+        <Slider fx:id="timeline" onMouseClicked="#onTimelineMouseClicked" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="35.0" AnchorPane.rightAnchor="35.0" />
+    </children>
+</AnchorPane>

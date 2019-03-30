@@ -1,0 +1,17 @@
+#playerPane {
+    -fx-background-color: #a4d1ff;
+    -fx-max-height: 90px;
+    -fx-min-height: 90px;
+    -fx-pref-width: 90px;
+}
+
+.button {
+    -fx-max-width: 100px;
+    -fx-max-height: 25px;
+    -fx-min-width: 100px;
+    -fx-min-height: 25px;
+}
+
+#playPause {
+    -fx-alignment: center;
+}

@@ -1,22 +1,20 @@
 package yousync.service;
 
 import org.springframework.stereotype.Service;
-import yousync.ui.MainController;
+import yousync.ui.AlertController;
 
 import java.io.File;
-
-import static java.util.Optional.ofNullable;
+import java.util.Optional;
 
 @Service
 public class ConfigurationService {
-    private static final File DEFAULT_DOWNLOAD_DIR = new File(System.getProperty("user.dir") + "/downloads");
+    private static final String DEFAULT_DOWNLOAD_DIR_PATH = System.getProperty("user.dir") + "/downloads";
     private File musicDirectory;
 
-    //TODO: Load configs from json if exists
-    public ConfigurationService() {
-        this.musicDirectory = ofNullable(musicDirectory).orElse(DEFAULT_DOWNLOAD_DIR);
+    public ConfigurationService(final String customDirectory) {
+        this.musicDirectory = new File(Optional.ofNullable(customDirectory).orElse(DEFAULT_DOWNLOAD_DIR_PATH));
         if (!this.musicDirectory.exists() && !this.musicDirectory.mkdir()) {
-            MainController.showErrorWindow("Failed to initialize download directory");
+            AlertController.showErrorWindow("Failed to initialize download directory");
         }
     }
 

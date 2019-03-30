@@ -14,8 +14,7 @@ import static java.util.regex.Pattern.compile;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class Song {
-    private static final Image UNAVAILABLE_IMAGE = new Image(
-            AbstractUIController.class.getClassLoader().getResource("unavailable.jpg").toString(),
+    private static final Image UNAVAILABLE_IMAGE = new Image(Song.class.getResource("/img/unavailable.jpg").toString(),
             100, 100, true, true);
 
     private String artist;
@@ -37,6 +36,7 @@ public class Song {
     }
 
     private void parseArtistAndTitle(String rawTitle) {
+        //TODO: Make title parser. Possible patterns: author - song, song by author, etc.
         Pattern pattern = compile("^(.*) - (.*)$");
         Matcher matcher = pattern.matcher(rawTitle);
         if (matcher.find()) {

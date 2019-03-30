@@ -1,0 +1,15 @@
+.split-pane *.split-pane-divider {
+    -fx-padding: 0 0 0 0;
+}
+
+#outerSplitPane {
+
+}
+
+#innerSplitPane {
+
+}
+
+.scroll-pane {
+    -fx-background: #f2f7ff;
+}

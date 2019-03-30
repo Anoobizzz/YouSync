@@ -10,7 +10,6 @@ public class Token {
     private String accessToken;
     @JsonProperty("token_type")
     private String tokenType;
-    //Seconds
     @JsonProperty("expires_in")
     private int expiresIn;
     @JsonProperty("refresh_token")
@@ -61,5 +60,9 @@ public class Token {
     public Token setTokenAcquireTime(long tokenAcquireTime) {
         this.tokenAcquireTime = tokenAcquireTime;
         return this;
+    }
+
+    public long getExpirationTimeMillis() {
+        return tokenAcquireTime + expiresIn * 1000;
     }
 }

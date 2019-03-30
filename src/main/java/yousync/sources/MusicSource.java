@@ -6,15 +6,15 @@ import yousync.domain.PlaylistResponse;
 import java.util.concurrent.CompletableFuture;
 
 public interface MusicSource {
-    default PlaylistResponse getPlaylist(PlaylistRequest playlistRequest) {
-        throw new UnsupportedOperationException("This music source does not support this flow!");
+    default boolean requiresAuthorization(String playlist) {
+        return false;
     }
-
-    CompletableFuture<Void> authorize();
 
     boolean isAuthorized();
 
-    default boolean requiresAuthorization(String playlist) {
-        return false;
+    CompletableFuture<Void> authorize(String clientId);
+
+    default PlaylistResponse getPlaylist(PlaylistRequest playlistRequest) {
+        throw new UnsupportedOperationException("This music source does not support this flow!");
     }
 }

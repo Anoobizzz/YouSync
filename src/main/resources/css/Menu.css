@@ -1,0 +1,34 @@
+#menuPane {
+    -fx-background-color: #e4ebf8;
+    -fx-max-width: 170px;
+    -fx-min-width: 170px;
+}
+
+#menuShow {
+    -fx-min-width: 25px;
+    -fx-max-width: 25px;
+}
+
+#downloadButton {
+    -fx-pref-width: 125px;
+    -fx-pref-height: 25px;
+}
+
+.text-field {
+    -fx-pref-width: 125px;
+    -fx-pref-height: 25px;
+    -fx-max-width: 125px;
+    -fx-max-height: 25px;
+}
+
+.password-field {
+    -fx-pref-width: 125px;
+    -fx-pref-height: 25px;
+    -fx-max-width: 125px;
+    -fx-max-height: 25px;
+}
+
+.label {
+    -fx-pref-height: 17px;
+    -webkit-fx-pref-width: 54px;
+}

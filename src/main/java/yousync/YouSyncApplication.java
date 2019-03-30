@@ -2,51 +2,32 @@ package yousync;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.springframework.boot.WebApplicationType;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import yousync.config.CommonConfiguration;
 
 import java.io.IOException;
 
-@SpringBootApplication
-@EnableAutoConfiguration
 public class YouSyncApplication extends Application {
     private static final String APP_WINDOW_TITLE = "YouSync";
-    private ConfigurableApplicationContext context;
-    private Parent root;
-
-    @Override
-    public void init() throws IOException {
-        context = new SpringApplicationBuilder(YouSyncApplication.class)
-                .web(WebApplicationType.NONE).build().run();
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Main.fxml"));
-        loader.setControllerFactory(context::getBean);
-        root = loader.load();
-    }
-
-    @Override
-    public void start(Stage stage) {
-        stage.setTitle(APP_WINDOW_TITLE);
-        stage.setMinWidth(720);
-        stage.setMinHeight(510);
-        stage.setScene(new Scene(root));
-        stage.setResizable(true);
-        stage.centerOnScreen();
-        stage.show();
-    }
-
-    @Override
-    public void stop() throws Exception {
-        super.stop();
-        context.close();
-    }
+    private static final ApplicationContext CONTEXT = new AnnotationConfigApplicationContext(CommonConfiguration.class);
 
     public static void main(String[] args) {
         Application.launch(YouSyncApplication.class, args);
+    }
+
+    @Override
+    public void start(final Stage stage) throws IOException {
+        final FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/Main.fxml"));
+        fxmlLoader.setControllerFactory(CONTEXT::getBean);
+        stage.setTitle(APP_WINDOW_TITLE);
+        stage.setMinWidth(720);
+        stage.setMinHeight(510);
+        stage.setScene(new Scene(fxmlLoader.load()));
+        stage.setResizable(true);
+        stage.centerOnScreen();
+        stage.show();
     }
 }
